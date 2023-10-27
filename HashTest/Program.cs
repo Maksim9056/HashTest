@@ -10,10 +10,14 @@ namespace HashTest
     {
         static void Main(string[] args)
         {
+            //"FD47AE52B163CE6AF07B6421B787C97658CCD092D540D78689F7DE94E322AFBF" "Кандидат 2, 13:35:25 21-03-2024"
+            //22AF6F4C418437931AFCBFEAB941F221464F91851F815F79CC9A32283E2BE619 Кандидат 1, 13:35:25 21-03-2024
+            //B5BC1B88037899FA9D1511C12C89B11D3776FC741BAC9C0C5ED042104ACF6C75 Кандидат 1
 
-            string message = "Кандидат 2, 13:35:25 21-03-2024";
+            string message = "Кандидат 1";
            SHA256 sha256 = new SHA256();
         var    hash_value = sha256.ComputeHash(message);
+
             Console.WriteLine(hash_value);
             //var origin_block = "";
             //var origin_time = DateTime.Now;
@@ -158,7 +162,6 @@ namespace HashTest
             byte[] paddedMessage = Padding(message);
 
 
-            string  mesr
             uint[] hash = new uint[]
             {
     0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
