@@ -12,7 +12,7 @@ namespace HashTest
         {
 
             string message = "Кандидат 2, 13:35:25 21-03-2024";
-        SHA256 sha256 = new SHA256();
+           SHA256 sha256 = new SHA256();
         var    hash_value = sha256.ComputeHash(message);
             Console.WriteLine(hash_value);
             //var origin_block = "";
@@ -67,11 +67,22 @@ namespace HashTest
             return ((num >> n) | (num << (32 - n))) & 0xFFFFFFFF;
         }
 
+        //  message = bytearray(message, 'utf-8')
+        //  ml = len(message) * 8  # message length in bits
+
+        // # Padding
+        // message.append(0x80)
+        // while (len(message)* 8) % 512 != 448:
+        //      message.append(0x00)
+        // message += ml.to_bytes(8, 'big')  # append original message length
+        //        return message
+
+
         private byte[] Padding(string message)
         {
             byte[] messageBytes = Encoding.UTF8.GetBytes(message);
 
-            message = Encoding.UTF8.GetString(messageBytes);
+           
 
             uint ml = (uint)(messageBytes.Length * 8);  // message length in bits
 
@@ -86,6 +97,7 @@ namespace HashTest
 
             return paddedMessage.ToArray();
         }
+
 
         private uint[] Compression(byte[] chunk, uint[] h)
         {
@@ -139,30 +151,26 @@ namespace HashTest
 
             return new uint[] { (h[0] + a) & 0xFFFFFFFF, (h[1] + b) & 0xFFFFFFFF, (h[2] + c) & 0xFFFFFFFF, (h[3] + d) & 0xFFFFFFFF, (h[4] + e) & 0xFFFFFFFF, (h[5] + f) & 0xFFFFFFFF, (h[6] + g) & 0xFFFFFFFF, (h[7] + hh) & 0xFFFFFFFF };
         }
+
+
         public string ComputeHash(string message)
         {
             byte[] paddedMessage = Padding(message);
 
+
+            string  mesr
             uint[] hash = new uint[]
             {
-        0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
-        0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19
+    0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
+    0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19
             };
 
             for (int i = 0; i < paddedMessage.Length; i += 64)
             {
-                if (i + 64 <= paddedMessage.Length)
-                {
-                    byte[] chunk = new byte[64];
-                    Array.Copy(paddedMessage, i, chunk, 0, 64);
-                    hash = Compression(chunk, hash);
-                }
-                else
-                {
-                    byte[] chunk = new byte[paddedMessage.Length - i];
-                    Array.Copy(paddedMessage, i, chunk, 0, chunk.Length);
-                    hash = Compression(chunk, hash);
-                }
+                int chunkSize = Math.Min(64, paddedMessage.Length - i);
+                byte[] chunk = new byte[chunkSize];
+                Array.Copy(paddedMessage, i, chunk, 0, chunkSize);
+                hash = Compression(chunk, hash);
             }
 
             StringBuilder sb = new StringBuilder();
@@ -171,7 +179,10 @@ namespace HashTest
                 sb.Append(h.ToString("X8"));
             }
 
-            return sb.ToString();
+            string result = sb.ToString();
+
+            //     var strin   = sb.
+            return result;
         }
 
     }
