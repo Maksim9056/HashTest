@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Intrinsics.Arm;
 using System.Security.Cryptography;
@@ -49,6 +50,72 @@ namespace HashTest
                 Console.WriteLine($"[{string.Join(", ", buckets)}]");
             }
 
+
+
+
+
+            //1.Функция DuplicatesBruteForce выполняет проверку наличия дубликатов в массиве, перебирая все возможные пары элементов
+            //.Она имеет сложность O(n^2) из - за двух вложенных циклов, каждый из которых выполняется от 0 до n-1 итераций.
+
+            //2.Функция DuplicatesNLogN сначала сортирует массив, а затем проверяет соседние элементы на наличие дубликатов
+            //.Сортировка массива занимает O(n log n) времени, а затем проход по отсортированному массиву выполняется за O(n - 1) времени
+            //.Итоговая сложность составляет O(n log n).
+
+            //3.Функция DuplicatesLinearExpected использует HashSet для отслеживания посещенных элементо
+            //в.Она проходит по массиву и проверяет, содержит ли HashSet текущий элемент.
+            //Если содержит, то есть дубликат, и функция возвращает true.Если элемент не найден в HashSet, он добавляется, чтобы в дальнейшем отслеживать его.
+            //Из - за использования HashSet, сложность этой функции составляет O(n).
+
+            //4.Функция DuplicatesK использует массив count, чтобы подсчитывать количество вхождений каждого элемента.Она проходит по массиву A и увеличивает соответствующий счетчик в массиве count.
+            //Если счетчик превысит 1, это означает наличие дубликата.
+            //Время выполнения этой функции похоже на O(n), но на самом деле она имеет сложность O(k), где k -это диапазон значений элементов в массиве.
+            //Это потому, что операция инкремента и проверка на > 0 выполняются за O(1) времени.
+
+
+//  1. `DuplicatesBruteForce`:
+//   -Сложность: O(n ^ 2)(квадратичная сложность).
+//   - Объяснение: Функция использует два вложенных цикла `for`,
+//   каждый из которых проходит по всем элементам массива `A`.
+//   Внутренний цикл сравнивает текущий элемент с каждым элементом массива после него.
+//   Это приводит к выполнению n(n - 1) / 2 операций сравнения, где n - количество элементов в массиве
+//   .Таким образом, время работы этой функции пропорционально n ^ 2 приближенно.
+
+//2. `DuplicatesNLogN`:
+//   -Сложность: O(n log n)(сортировка logарифмическая сложность).
+//   - Объяснение: Функция сначала сортирует массив `A` с использованием `OrderBy`, что имеет сложность O(n log n).
+//   Затем она проходит по сортированному массиву и находит пары соседних элементов, которые равны друг другу
+//   .Функция останавливается при первой паре дубликатов и возвращает `true`, иначе возвращает `false`.
+//3. `DuplicatesLinearExpected`:
+//   -Сложность: O(n)(линейная сложность).
+//   - Объяснение: В этой функции используется `HashSet` (`HashSet<int>`), который предоставляет почти константное время для операций добавления, поиска и удаления элементов.Функция проходит по массиву `A`
+//   и добавляет каждый элемент в `HashSet`. При обнаружении дубликата, функция немедленно возвращает `true`.
+//   Если во всем массиве не найдено дубликатов, функция возвращает `false`. Время выполнения зависит от количества элементов в массиве и времени добавления в `HashSet`, но ожидается, что оно будет линейным.
+
+//4. `DuplicatesK`:
+//   -Сложность: O(n + k)(линейная сложность).
+//   - Объяснение: В этой функции используется массив `count`, который хранит количество вхождений каждого элемента `num` из массива `A`.
+//   Функция проходит по массиву `A` и увеличивает `count[num]`,
+//   чтобы отслеживать количество вхождений каждого элемента. Если `count[num]` становится больше 1, функция сразу же возвращает `true`, иначе она возвращает `false`.
+//   Время выполнения зависит от количества элементов в массиве и размера массива `count`, то есть времени чтения и записи O(n + k).
+
+            int[] b={ 4, 2, 7, 1, 10, 9, 5, 2 }; // Есть повторения
+
+            Console.WriteLine("Наивный алгоритм (brute-force):");
+            bool resultBruteForce = DuplicatesBruteForce(b);
+            Console.WriteLine(resultBruteForce);
+
+            Console.WriteLine("Алгоритм, работающий за O(n log n):");
+            bool resultNLogN = DuplicatesNLogN(b);
+            Console.WriteLine(resultNLogN);
+
+            Console.WriteLine("Алгоритм с ожидаемым (средним) временем работы O(n):");
+            bool resultLinearExpected = DuplicatesLinearExpected(b);
+            Console.WriteLine(resultLinearExpected);
+
+            Console.WriteLine("Алгоритм с ожидаемым (средним) временем работы O(k):");
+            int k = 10;
+            bool resultK = DuplicatesK(b, k);
+            Console.WriteLine(resultK);
             //var origin_block = "";
             //var origin_time = DateTime.Now;
             //var origin_previous_hash = "";
@@ -68,10 +135,67 @@ namespace HashTest
             //}
 
 
+
             Console.ReadLine();
             }
 
+        static bool DuplicatesBruteForce(int[] A)
+        {
+            int n = A.Length;
+            for (int i = 0; i < n; i++)
+            {
+                for (int j = i + 1; j < n; j++)
+                {
+                    if (A[i] == A[j])
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
 
+        static bool DuplicatesNLogN(int[] A)
+        {
+            int[] sorted_A = A.OrderBy(x => x).ToArray();
+            int n = sorted_A.Length;
+            for (int i = 0; i < n - 1; i++)
+            {
+                if (sorted_A[i] == sorted_A[i + 1])
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        static bool DuplicatesLinearExpected(int[] A)
+        {
+            var seen = new HashSet<int>();
+            foreach (int num in A)
+            {
+                if (seen.Contains(num))
+                {
+                    return true;
+                }
+                seen.Add(num);
+            }
+            return false;
+        }
+
+        static bool DuplicatesK(int[] A, int k)
+        {
+            int[] count = new int[k + 1];
+            foreach (int num in A)
+            {
+                if (count[num] > 0)
+                {
+                    return true;
+                }
+                count[num]++;
+            }
+            return false;
+        }
 
 
 
