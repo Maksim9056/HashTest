@@ -20,12 +20,14 @@ namespace HashTest
 
             Console.WriteLine(hash_value);
 
-
-            int[] A = new int[100];
-            for (int i = 0; i < 100; i++)
-            {
-                A[i] = i;
-            }
+            //
+            int[] A = new int[] {67, 13, 49, 24, 40, 33, 58 };
+            
+            //Не сгенироровать
+            //for (int i = 0; i < 100; i++)
+            //{
+            //    A[i] = i;
+            //}
 
             Console.WriteLine("Закрытая адресация:");
             List<List<int>> resultClosedAddressing = ClosedAddressing(A);
@@ -39,6 +41,7 @@ namespace HashTest
             Console.WriteLine();
 
             Console.WriteLine();
+            
             Console.WriteLine("Открытая  адресация:");
             List<List<int>> openAddressing = OpenAddressing(A);
             foreach (List<int> buckets in openAddressing)
@@ -74,7 +77,8 @@ namespace HashTest
 
         static List<List<int>> OpenAddressing(int[] A)
         {
-            int size = A.Length;  // Простое число, ближайшее к удвоенному размеру списка A
+            //Сколько задать ?
+            int size = 9;// Простое число, ближайшее к удвоенному размеру списка A
             List<List<int>> hashtable = new List<List<int>>();
 
             for (int i = 0; i < size; i++)
