@@ -15,10 +15,37 @@ namespace HashTest
             //B5BC1B88037899FA9D1511C12C89B11D3776FC741BAC9C0C5ED042104ACF6C75 Кандидат 1
 
             string message = "Кандидат 1";
-           SHA256 sha256 = new SHA256();
-        var    hash_value = sha256.ComputeHash(message);
+            SHA256 sha256 = new SHA256();
+            var hash_value = sha256.ComputeHash(message);
 
             Console.WriteLine(hash_value);
+
+
+            int[] A = new int[100];
+            for (int i = 0; i < 100; i++)
+            {
+                A[i] = i;
+            }
+
+            Console.WriteLine("Закрытая адресация:");
+            List<List<int>> resultClosedAddressing = ClosedAddressing(A);
+            foreach (List<int> bucket in resultClosedAddressing)
+            {
+                Console.WriteLine($"[{string.Join(", ", bucket)}]");
+            }
+
+            Console.WriteLine();
+            Console.WriteLine();
+            Console.WriteLine();
+
+            Console.WriteLine();
+            Console.WriteLine("Открытая  адресация:");
+            List<List<int>> openAddressing = OpenAddressing(A);
+            foreach (List<int> buckets in openAddressing)
+            {
+                Console.WriteLine($"[{string.Join(", ", buckets)}]");
+            }
+
             //var origin_block = "";
             //var origin_time = DateTime.Now;
             //var origin_previous_hash = "";
@@ -39,15 +66,73 @@ namespace HashTest
 
 
             Console.ReadLine();
+            }
+
+
+
+
+
+        static List<List<int>> OpenAddressing(int[] A)
+        {
+            int size = A.Length;  // Простое число, ближайшее к удвоенному размеру списка A
+            List<List<int>> hashtable = new List<List<int>>();
+
+            for (int i = 0; i < size; i++)
+            {
+                hashtable.Add(new List<int>());  // Используем пустые списки для обозначения пустых ячеек
+            }
+
+            int HashFunction(int key)
+            {
+                return (11 * key + 4) % size;
+            }
+
+            foreach (int key in A)
+            {
+                int index = HashFunction(key);
+
+                while (hashtable[index].Count > 0)
+                {
+                    index = (index + 1) % size;
+                }
+
+                hashtable[index].Add(key);
+            }
+
+            return hashtable;
         }
 
+        static List<List<int>> ClosedAddressing(int[] A)
+            {
+                int size = 9;
+                List<List<int>> hashtable = new List<List<int>>();
 
-    }
+                int HashFunction(int key)
+                {
+                    return (11 * key + 4) % size;
+                }
 
-    public class SHA256
-    {
-        private uint[] K = new uint[]
+                for (int i = 0; i < size; i++)
+                {
+                    hashtable.Add(new List<int>());
+                }
+
+                foreach (int key in A)
+                {
+                    int index = HashFunction(key);
+                    hashtable[index].Add(key);
+                }
+
+                return hashtable;
+            }
+
+
+        }
+
+        public class SHA256
         {
+            private uint[] K = new uint[]
+            {
         0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5,
         0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
         0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3,
@@ -64,131 +149,132 @@ namespace HashTest
         0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
         0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208,
         0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
-        };
-
-        private uint RightRotate(uint num, int n)
-        {
-            return ((num >> n) | (num << (32 - n))) & 0xFFFFFFFF;
-        }
-
-        //  message = bytearray(message, 'utf-8')
-        //  ml = len(message) * 8  # message length in bits
-
-        // # Padding
-        // message.append(0x80)
-        // while (len(message)* 8) % 512 != 448:
-        //      message.append(0x00)
-        // message += ml.to_bytes(8, 'big')  # append original message length
-        //        return message
-
-
-        private byte[] Padding(string message)
-        {
-            byte[] messageBytes = Encoding.UTF8.GetBytes(message);
-
-           
-
-            uint ml = (uint)(messageBytes.Length * 8);  // message length in bits
-
-            // Padding
-            List<byte> paddedMessage = new List<byte>(messageBytes);
-            paddedMessage.Add(0x80);
-            while ((paddedMessage.Count * 8) % 512 != 448)
-            {
-                paddedMessage.Add(0x00);
-            }
-            paddedMessage.AddRange(BitConverter.GetBytes(ml).Reverse());  // append original message length
-
-            return paddedMessage.ToArray();
-        }
-
-
-        private uint[] Compression(byte[] chunk, uint[] h)
-        {
-
-            if (chunk.Length < 16)
-            {
-                // Обработка ошибки или возврат из функции, в зависимости от вашей логики
-                return null;
-            }
-
-            uint[] w = new uint[64];
-            for (int j = 0; j < chunk.Length / 4; j++)
-            {
-                w[j] = BitConverter.ToUInt32(chunk, j * 4);
-            }
-
-            for (int j = 16; j < 64; j++)
-            {
-                uint s0 = RightRotate(w[j - 15], 7) ^ RightRotate(w[j - 15], 18) ^ (w[j - 15] >> 3);
-                uint s1 = RightRotate(w[j - 2], 17) ^ RightRotate(w[j - 2], 19) ^ (w[j - 2] >> 10);
-                w[j] = (w[j - 16] + s0 + w[j - 7] + s1) & 0xFFFFFFFF;
-            }
-
-            uint a = h[0];
-            uint b = h[1];
-            uint c = h[2];
-            uint d = h[3];
-            uint e = h[4];
-            uint f = h[5];
-            uint g = h[6];
-            uint hh = h[7];
-
-            for (int j = 0; j < 64; j++)
-            {
-                uint S1 = RightRotate(e, 6) ^ RightRotate(e, 11) ^ RightRotate(e, 25);
-                uint ch = (e & f) ^ (~e & g);
-                uint temp1 = (hh + S1 + ch + K[j] + w[j]) & 0xFFFFFFFF;
-                uint S0 = RightRotate(a, 2) ^ RightRotate(a, 13) ^ RightRotate(a, 22);
-                uint maj = (a & b) ^ (a & c) ^ (b & c);
-                uint temp2 = (S0 + maj) & 0xFFFFFFFF;
-
-                hh = g;
-                g = f;
-                f = e;
-                e = (d + temp1) & 0xFFFFFFFF;
-                d = c;
-                c = b;
-                b = a;
-                a = (temp1 + temp2) & 0xFFFFFFFF;
-            }
-
-            return new uint[] { (h[0] + a) & 0xFFFFFFFF, (h[1] + b) & 0xFFFFFFFF, (h[2] + c) & 0xFFFFFFFF, (h[3] + d) & 0xFFFFFFFF, (h[4] + e) & 0xFFFFFFFF, (h[5] + f) & 0xFFFFFFFF, (h[6] + g) & 0xFFFFFFFF, (h[7] + hh) & 0xFFFFFFFF };
-        }
-
-
-        public string ComputeHash(string message)
-        {
-            byte[] paddedMessage = Padding(message);
-
-
-            uint[] hash = new uint[]
-            {
-    0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
-    0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19
             };
 
-            for (int i = 0; i < paddedMessage.Length; i += 64)
+            private uint RightRotate(uint num, int n)
             {
-                int chunkSize = Math.Min(64, paddedMessage.Length - i);
-                byte[] chunk = new byte[chunkSize];
-                Array.Copy(paddedMessage, i, chunk, 0, chunkSize);
-                hash = Compression(chunk, hash);
+                return ((num >> n) | (num << (32 - n))) & 0xFFFFFFFF;
             }
 
-            StringBuilder sb = new StringBuilder();
-            foreach (uint h in hash)
+            //  message = bytearray(message, 'utf-8')
+            //  ml = len(message) * 8  # message length in bits
+
+            // # Padding
+            // message.append(0x80)
+            // while (len(message)* 8) % 512 != 448:
+            //      message.append(0x00)
+            // message += ml.to_bytes(8, 'big')  # append original message length
+            //        return message
+
+
+            private byte[] Padding(string message)
             {
-                sb.Append(h.ToString("X8"));
+                byte[] messageBytes = Encoding.UTF8.GetBytes(message);
+
+
+
+                uint ml = (uint)(messageBytes.Length * 8);  // message length in bits
+
+                // Padding
+                List<byte> paddedMessage = new List<byte>(messageBytes);
+                paddedMessage.Add(0x80);
+                while ((paddedMessage.Count * 8) % 512 != 448)
+                {
+                    paddedMessage.Add(0x00);
+                }
+                paddedMessage.AddRange(BitConverter.GetBytes(ml).Reverse());  // append original message length
+
+                return paddedMessage.ToArray();
             }
 
-            string result = sb.ToString();
 
-            //     var strin   = sb.
-            return result;
+            private uint[] Compression(byte[] chunk, uint[] h)
+            {
+
+                if (chunk.Length < 16)
+                {
+                    // Обработка ошибки или возврат из функции, в зависимости от вашей логики
+                    return null;
+                }
+
+                uint[] w = new uint[64];
+                for (int j = 0; j < chunk.Length / 4; j++)
+                {
+                    w[j] = BitConverter.ToUInt32(chunk, j * 4);
+                }
+
+                for (int j = 16; j < 64; j++)
+                {
+                    uint s0 = RightRotate(w[j - 15], 7) ^ RightRotate(w[j - 15], 18) ^ (w[j - 15] >> 3);
+                    uint s1 = RightRotate(w[j - 2], 17) ^ RightRotate(w[j - 2], 19) ^ (w[j - 2] >> 10);
+                    w[j] = (w[j - 16] + s0 + w[j - 7] + s1) & 0xFFFFFFFF;
+                }
+
+                uint a = h[0];
+                uint b = h[1];
+                uint c = h[2];
+                uint d = h[3];
+                uint e = h[4];
+                uint f = h[5];
+                uint g = h[6];
+                uint hh = h[7];
+
+                for (int j = 0; j < 64; j++)
+                {
+                    uint S1 = RightRotate(e, 6) ^ RightRotate(e, 11) ^ RightRotate(e, 25);
+                    uint ch = (e & f) ^ (~e & g);
+                    uint temp1 = (hh + S1 + ch + K[j] + w[j]) & 0xFFFFFFFF;
+                    uint S0 = RightRotate(a, 2) ^ RightRotate(a, 13) ^ RightRotate(a, 22);
+                    uint maj = (a & b) ^ (a & c) ^ (b & c);
+                    uint temp2 = (S0 + maj) & 0xFFFFFFFF;
+
+                    hh = g;
+                    g = f;
+                    f = e;
+                    e = (d + temp1) & 0xFFFFFFFF;
+                    d = c;
+                    c = b;
+                    b = a;
+                    a = (temp1 + temp2) & 0xFFFFFFFF;
+                }
+
+                return new uint[] { (h[0] + a) & 0xFFFFFFFF, (h[1] + b) & 0xFFFFFFFF, (h[2] + c) & 0xFFFFFFFF, (h[3] + d) & 0xFFFFFFFF, (h[4] + e) & 0xFFFFFFFF, (h[5] + f) & 0xFFFFFFFF, (h[6] + g) & 0xFFFFFFFF, (h[7] + hh) & 0xFFFFFFFF };
+            }
+
+
+            public string ComputeHash(string message)
+            {
+                byte[] paddedMessage = Padding(message);
+
+
+                uint[] hash = new uint[]
+                {
+    0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
+    0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19
+                };
+
+                for (int i = 0; i < paddedMessage.Length; i += 64)
+                {
+                    int chunkSize = Math.Min(64, paddedMessage.Length - i);
+                    byte[] chunk = new byte[chunkSize];
+                    Array.Copy(paddedMessage, i, chunk, 0, chunkSize);
+                    hash = Compression(chunk, hash);
+                }
+
+                StringBuilder sb = new StringBuilder();
+                foreach (uint h in hash)
+                {
+                    sb.Append(h.ToString("X8"));
+                }
+
+                string result = sb.ToString();
+
+                //     var strin   = sb.
+                return result;
+            }
+
         }
-
     }
-}
+
 
 
